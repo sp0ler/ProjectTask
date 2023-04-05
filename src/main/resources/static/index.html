@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<body>
+<div id="tools">
+    <label for="color-picker">Color</label>
+    <input id="color-picker" type="color">
+    <div>
+        Position: x = <span id="xCord"></span>, y = <span id="yCord"></span>
+    </div>
+</div>
+<canvas id="map"></canvas>
+<script type="text/javascript" src="map.js"></script>
+
+<style>
+        * { margin: 0; padding: 0; text-align: center;}
+
+body, html { height:100%; }
+
+#map {
+    min-width:1000px;
+    min-height:1000px;
+}
+#tools {
+    position: fixed;
+    top: 10px;
+    width: 200px;
+     background-color: rgba(255,255,255,100);
+}
+
+</style>
+</body>
+</html>
