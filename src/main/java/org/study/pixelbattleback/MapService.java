@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.study.pixelbattleback.dto.Coordinate;
 import org.study.pixelbattleback.dto.Map;
 import org.study.pixelbattleback.dto.PixelRequest;
 
@@ -11,7 +12,6 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -20,11 +20,8 @@ public class MapService {
 
     public static final String MAP_BIN = "map.bin";
 
-    private final int width;
-
-    private final int height;
-
-    private final int[] colors;
+    public static final int width = 100;
+    public static final int height = 100;
 
     private boolean isChanged;
 
@@ -33,9 +30,10 @@ public class MapService {
      */
     public MapService() {
         Map tmp = new Map();
-        tmp.setWidth(100);
-        tmp.setHeight(100);
-        tmp.setColors(new int[tmp.getWidth() * tmp.getHeight()]);
+        tmp.setWidth(width);
+        tmp.setHeight(height);
+        tmp.setColors(Coordinate.getColors());
+
         try (FileInputStream fileInputStream = new FileInputStream(MAP_BIN);
              ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream)) {
             Object o = objectInputStream.readObject();
@@ -43,9 +41,8 @@ public class MapService {
         } catch (Exception e) {
             logger.error("Загрузка не удалась, начинаем с пустой карты. " + e.getMessage(), e);
         }
-        width = tmp.getWidth();
-        height = tmp.getHeight();
-        colors = tmp.getColors();
+
+        tmp.setColors(Coordinate.getColors());
     }
 
     /**
@@ -54,29 +51,22 @@ public class MapService {
      * @param pixel
      * @return
      */
-    public synchronized boolean draw(PixelRequest pixel) {
+    public boolean draw(PixelRequest pixel) {
         int x = pixel.getX();
         int y = pixel.getY();
         if (x < 0 || x >= width || y < 0 || y >= height) {
             return false;
         }
-        colors[y * width + x] = pixel.getColor();
-        isChanged = true;
-        return true;
-    }
 
-    /**
-     * Чтение всей карты
-     *
-     * @return
-     */
-    private synchronized int[] getColors() {
-        return Arrays.copyOf(colors, colors.length);
+        Coordinate coordinate = Coordinate.getCoordinate(pixel);
+        isChanged = Coordinate.changeColor(coordinate, pixel.getColor());
+
+        return true;
     }
 
     public Map getMap() {
         Map mapObj = new Map();
-        mapObj.setColors(getColors());
+        mapObj.setColors(Coordinate.getColors());
         mapObj.setWidth(width);
         mapObj.setHeight(height);
         return mapObj;
